@@ -111,10 +111,6 @@ module LanguageFilter
     end
 
     def sanitize(text)
-      # Custom for NuCloud
-      text = text.strip
-      # End
-      
       return text unless text.to_s.size >= 3
       chosen_matchlist = case @creative_letters
       when true then @creative_matchlist
@@ -122,6 +118,28 @@ module LanguageFilter
       end
       chosen_matchlist.each do |list_item|
         start_at = 0
+
+        #-Custom for NuCloud
+
+        #Remove all unneeded value that eye can never see (It's Weird where the only system can see this hidden string)
+        list_item.to_s.strip
+
+        #Removed the remaining unneeded character
+        list_item.gsub!('?:','')
+
+        #Get the last index per word
+        if list_item != chosen_matchlist.last
+          word_size = list_item.size-1
+        else
+          word_size = list_item.size
+        end
+        sanitize_word = list_item[0,word_size]
+
+        #Update the original list_item with the sanitized word
+        list_item = sanitize_word.to_s
+        
+        #-End
+
         text.gsub!(%r"#{beg_regex}#{list_item}#{end_regex}"i) do |match|
           unless @exceptionlist.empty? then
             match_start = text[start_at..-1].index(%r"#{beg_regex}#{list_item}#{end_regex}"i) + start_at
@@ -135,6 +153,7 @@ module LanguageFilter
             replace(match)
           end
         end
+
       end
       text
     end
@@ -273,7 +292,7 @@ module LanguageFilter
       if @creative_letters then
         CREATIVE_BEG_REGEX
       else
-        '\\b'
+        '\\b('
       end
     end
 
@@ -281,7 +300,7 @@ module LanguageFilter
       if @creative_letters then
         CREATIVE_END_REGEX
       else
-        '\\b'
+        ')*\\b'
       end
     end
   end
