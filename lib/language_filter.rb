@@ -111,6 +111,10 @@ module LanguageFilter
     end
 
     def sanitize(text)
+      # Custom for NuCloud
+      text = text.strip
+      # End
+      
       return text unless text.to_s.size >= 3
       chosen_matchlist = case @creative_letters
       when true then @creative_matchlist
